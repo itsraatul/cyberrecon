@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
 import argparse
-from modules.subdomains import subdomain_enum
-from modules.portscan import port_scan
+from core.engine import ReconEngine
 
 def banner():
     print(r"""
-C y b e r | R e c o n
-   CyberRecon - Automated Recon Tool
+   ____           __                 
+  / ___|   _ _ __| |__   ___ _ __    
+ | |  | | | | '__| '_ \ / _ \ '__|   
+ | |__| |_| | |  | | | |  __/ |      
+  \____\__,_|_|  |_| |_|\___|_|      
+
+   CyberRecon - Modular Recon Framework
     """)
 
 def main():
     banner()
-    parser = argparse.ArgumentParser(description="CyberRecon - Automated Reconnaissance Tool")
+    parser = argparse.ArgumentParser(description="CyberRecon - Automated Recon Framework")
     parser.add_argument("target", help="Target domain or IP")
-    parser.add_argument("--subdomains", action="store_true", help="Run subdomain enumeration")
-    parser.add_argument("--portscan", action="store_true", help="Run port scan (default 1-1000)")
-    parser.add_argument("--ports", default="1-1000", help="Port range (default: 1-1000)")
+    parser.add_argument("--modules", nargs="+", help="Modules to run (example: subdomains portscan)")
     args = parser.parse_args()
 
-    print(f"[+] Target received: {args.target}")
+    engine = ReconEngine(args.target)
 
-    if args.subdomains:
-        subdomain_enum(args.target)
+    if args.modules:
+        for mod in args.modules:
+            engine.load_module(mod)
+    else:
+        print("[*] No modules specified. Example: --modules subdomains portscan")
+        return
 
-    if args.portscan:
-        port_scan(args.target, args.ports)
+    engine.run()
 
 if __name__ == "__main__":
     main()
